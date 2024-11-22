@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: default-binder
+type: Opaque
+stringData: 
+  spring.cloud.stream.rabbit.binder.nodes[0]: 'rabbitmq:5672'
+

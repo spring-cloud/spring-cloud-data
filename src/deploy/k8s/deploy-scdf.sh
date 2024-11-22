@@ -196,8 +196,8 @@ kubectl apply --namespace "$NS" -f "$YAML_PATH/server-config.yaml"
 
 
 kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
-
-kubectl apply --namespace "$NS" -f "$YAML_PATH/skipper-config-$BROKER.yaml"
+kubectl apply --namespace "$NS" -f "$YAML_PATH/${BROKER}-default-binder.yaml"
+kubectl apply --namespace "$NS" -f "$YAML_PATH/skipper-config.yaml"
 cat "$YAML_PATH/skipper-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$SKIPPER_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
 kubectl create --namespace "$NS" -f "$YAML_PATH/skipper-svc.yaml"
 

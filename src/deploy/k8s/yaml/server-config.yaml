@@ -17,7 +17,7 @@ data:
             enabled: false
     maven:
       remoteRepositories:
-        sprinklerRepo: 
+        sprinklerRepo:
           url: https://maven.pkg.github.com/corneil/sprinkler-demos
           username: 'corneil'
           password: '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'
@@ -32,7 +32,7 @@ data:
             imagePullSecret: registry-key
             containerSecurityContext:
               runAsUser:
-        dataflow:          
+        dataflow:
           metrics.dashboard:
             url: 'http://localhost:3000'
           task:
