@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "scdf.fullname" . }}-test-connection"
+  labels:
+    {{- include "scdf.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['scdf-server:{{ .Values.server.service.port }}']
+  restartPolicy: Never

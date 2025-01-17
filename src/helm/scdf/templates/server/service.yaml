@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: scdf-server
+  labels:
+    {{- include "scdf.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.server.service.type }}
+  ports:
+    - port: {{ default .Values.server.service.port 9393 }}
+      targetPort: {{ default .Values.server.service.port 9393 }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "scdf.selectorLabels" . | nindent 4 }}

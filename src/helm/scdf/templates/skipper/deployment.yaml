@@ -1,0 +1,199 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scdf-skipper
+  labels:
+    app: scdf-skipper
+    {{- include "scdf.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "scdf.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "scdf.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "scdf.serviceAccountName" . }}
+      {{- with mergeOverwrite .Values.global.podSecurityContext .Values.skipper.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "scdf.fullname" . }}-skipper
+          {{- with mergeOverwrite .Values.global.securityContext .Values.server.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- $skipperImage := .Values.skipper.image.repository | default "springcloud/spring-cloud-skipper-server" }}
+          {{- $skipperTag := .Values.skipper.image.tag | default .Chart.AppVersion }}
+          image: {{ print $skipperImage ":" $skipperTag | squote }}
+          {{- $GlobalImagePullPolicy := .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.skipper.image.pullPolicy | default $GlobalImagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.skipper.containerPort | default 7577 }}
+              protocol: {{ .Values.skipper.protocol | default "TCP" }}
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.skipper.containerPort | default 7577 }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.namespace"
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: {{ .Values.skipper.config.springCloudConfigEnabled | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+              value: {{ .Values.skipper.config.springCloudKubernetesEnableApi | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+              value: {{ .Values.skipper.config.springCloudKubernetesSecretsEnableApi | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+              value: '/workspace/runtime/secrets'
+            {{- $databaseDialect := .Values.skipper.config.database.dialect | default .Values.configuration.database.dialect }}
+            {{- if $databaseDialect  }}
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: {{ $databaseDialect | squote }}
+            {{- end }}
+            {{- $databaseUrl := .Values.skipper.config.database.url | default .Values.configuration.database.url }}
+            {{- if $databaseUrl  }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ $databaseUrl | squote }}
+            {{- end }}
+            {{- $databaseDriverClassName := .Values.skipper.config.database.driverClassName | default .Values.configuration.database.driverClassName }}
+            {{- if $databaseDriverClassName  }}
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: {{ $databaseDriverClassName | squote }}
+            {{- end }}
+            {{- with .Values.skipper.config.database.testOnBorrow | default .Values.configuration.database.testOnBorrow }}
+            - name: SPRING_DATASOURCE_TEST_ON_BORROW
+              value: {{ . | squote }}
+            {{- end }}
+            {{- $databaseUserNameSecret := .Values.skipper.config.database.usernameSecret | default .Values.configuration.database.usernameSecret }}
+            {{- if $databaseUserNameSecret }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $databaseUserNameSecret.name | squote }}
+                  key: {{ $databaseUserNameSecret.key | squote }}
+            {{- else }}
+            {{- with .Values.skipper.config.database.username | default .Values.configuration.database.username }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- $databasePasswordSecret := .Values.skipper.config.database.passwordSecret | default .Values.configuration.database.passwordSecret }}
+            {{- if $databasePasswordSecret  }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $databasePasswordSecret.name | squote }}
+                  key: {{ $databasePasswordSecret.key | squote }}
+            {{- else }}
+            {{- with .Values.skipper.config.database.password | default .Values.configuration.database.password }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.configuration.broker.type "rabbit" }}
+            - name: SPRING_RABBITMQ_HOST
+              value: {{ .Values.configuration.broker.rabbit.host | squote }}
+            - name: SPRING_RABBITMQ_PORT
+              value: {{ .Values.configuration.broker.rabbit.port | default 5672 | squote }}
+            {{- with .Values.configuration.broker.rabbit.usernameSecret }}
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | squote }}
+                  key: {{ .key | squote }}
+            {{- else }}
+            {{- with .Values.configuration.broker.rabbit.username }}
+            - name: SPRING_RABBITMQ_USERNAME
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.configuration.broker.rabbit.passwordSecret }}
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | squote }}
+                  key: {{ .key | squote }}
+            {{- else }}
+            {{- with .Values.configuration.broker.rabbit.username }}
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.configuration.broker.type "kafka" }}
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              value: {{ .Values.configuration.broker.kafka.brokers | squote }}
+            {{- end }}
+          {{- with mergeOverwrite .Values.global.startupProbe .Values.skipper.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.livenessProbe .Values.skipper.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.readinessProbe .Values.skipper.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.resources .Values.skipper.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.skipper.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- else }}
+          volumeMounts:
+          - name: config
+            mountPath: '/workspace/config'
+            readOnly: true
+          {{- end }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range . }}
+        - name: {{ . }}
+      {{- end }}
+      {{- else }}
+      {{- with .Values.skipper.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range . }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.skipper.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- else }}
+      volumes:
+      - name: config
+        configMap:
+          name: scdf-skipper
+          items:
+          - key: 'application-kubernetes.yaml'
+            path: 'application-kubernetes.yaml'
+      {{- end }}
+      {{- with .Values.skipper.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

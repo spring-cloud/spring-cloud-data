@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+data:
+  application-kubernetes.yaml: |-
+    logging:
+      level:
+        root: info
+    {{- with mergeOverwrite .Values.global.management .Values.server.config.management }}
+    management:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{/* create properties from various configuration spring values to be merged with server.config.spring */}}
+    {{- define "server.spring.properties" }}
+    output:
+      ansi:
+        enabled: NEVER
+    cloud:
+    {{- with .Values.configuration.task.deployer.kubernetes }}
+      deployer:
+        kubernetes:
+          {{- toYaml . | nindent 10 }}
+    {{- end }}
+      dataflow:
+        features:
+          streams:
+            enabled: {{ .Values.configuration.streamsEnabled | default true }}
+          tasks:
+            enabled: {{ .Values.configuration.tasksEnabled | default true }}
+          schedules:
+            enabled: {{ .Values.configuration.schedulesEnabled | default true }}
+      {{- with .Values.configuration.metrics.dashboard.url }}
+        metrics:
+          dashboard:
+            url: {{ . | squote }}
+      {{- end }}
+      {{- with .Values.configuration.task.platform.kubernetes }}
+        task:
+          platform:
+            kubernetes:
+              {{- toYaml . | nindent 14 }}
+      {{- end }}
+    {{- end }}
+    {{- $localServerSpring :=  include "server.spring.properties" . | fromYaml }}
+    {{- with .Values.server.config.spring }}
+    {{- with mergeOverwrite $localServerSpring $.Values.server.config.spring }}
+    spring:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- else }}
+    {{- with $localServerSpring }}
+    spring:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- end }}
+    {{- define "server.server.properties" }}
+    {{- with .Values.server.contextPath }}
+      contextPath: {{ . }}
+    {{- end }}
+    {{- end }}
+    {{- $localServerServer := include "server.server.properties" . | fromYaml }}
+    {{- with mergeOverwrite .Values.server.config.server $localServerServer }}
+    server:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}

@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+    {{- include "scdf.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "scdf.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.server.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "scdf.labels" . | nindent 8 }}
+        {{- with .Values.server.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "scdf.serviceAccountName" . }}
+      {{- with mergeOverwrite .Values.global.podSecurityContext .Values.server.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: scdf-server
+          {{- with mergeOverwrite .Values.global.securityContext .Values.server.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- $serverImage := .Values.server.image.repository | default "springcloud/spring-cloud-dataflow-server" }}
+          {{- $serverTag := .Values.server.image.tag | default .Chart.AppVersion }}
+          image: {{ print $serverImage ":" $serverTag | squote }}
+          {{- $GlobalImagePullPolicy := .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.server.image.pullPolicy | default $GlobalImagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.containerPort | default 9393 }}
+              protocol: {{ .Values.server.protocol | default "TCP" }}
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.server.containerPort | default 9393 | squote }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.namespace"
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: {{ .Values.server.config.springCloudConfigEnabled | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+              value: {{ .Values.server.config.springCloudKubernetesEnableApi | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+              value: {{ .Values.server.config.springCloudKubernetesSecretsEnableApi | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+              value: '/workspace/runtime/secrets'
+            - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
+              value: {{ .Values.configuration.analytics.enabled | default false | squote }}
+            - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
+              value: {{ .Values.configuration.schedules.enabled | default true | squote }}
+            - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
+              {{- $ctrImageRepository := .Values.configuration.composedTaskRunner.image.repository | default "springcloud/spring-cloud-dataflow-composed-task-runner" }}
+              {{- if .Values.configuration.composedTaskRunner.image.digest }}
+              value: {{ print "docker://" $ctrImageRepository ":" .Values.configuration.composedTaskRunner.image.digest | squote }}
+              {{- else }}
+              {{- $ctrImageTag := .Values.configuration.composedTaskRunner.image.tag | default "2.11.5-SNAPSHOT" }}
+              value: {{ print "docker://" $ctrImageRepository ":" $ctrImageTag | squote }}
+              {{- end }}
+            - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
+              value: {{ .Values.server.config.serverUri | default "http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}" | squote }}
+            - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
+              value: {{ .Values.server.config.skipperUri | default "http://${SCDF_SKIPPER_SERVICE_HOST}:${SCDF_SKIPPER_SERVICE_PORT}/api" | squote }}
+            {{- $databaseDialect := .Values.server.config.database.dialect | default .Values.configuration.database.dialect }}
+            {{- if $databaseDialect  }}
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: {{ $databaseDialect | squote }}
+            {{- end }}
+            {{- $databaseUrl := .Values.server.config.database.url | default .Values.configuration.database.url }}
+            {{- if $databaseUrl  }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ $databaseUrl | squote }}
+            {{- end }}
+            {{- $databaseDriverClassName := .Values.server.config.database.driverClassName | default .Values.configuration.database.driverClassName }}
+            {{- if $databaseDriverClassName  }}
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: {{ $databaseDriverClassName | squote }}
+            {{- end }}
+            {{- with .Values.server.config.database.testOnBorrow | default .Values.configuration.database.testOnBorrow }}
+            - name: SPRING_DATASOURCE_TEST_ON_BORROW
+              value: {{ . | squote }}
+            {{- end }}
+            {{- $databaseUserNameSecret := .Values.server.config.database.usernameSecret | default .Values.configuration.database.usernameSecret }}
+            {{- if $databaseUserNameSecret }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $databaseUserNameSecret.name | squote }}
+                  key: {{ $databaseUserNameSecret.key | squote }}
+            {{- else }}
+            {{- with .Values.server.config.database.username | default .Values.configuration.database.username }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- $databasePasswordSecret := .Values.server.config.database.passwordSecret | default .Values.configuration.database.passwordSecret }}
+            {{- if $databasePasswordSecret  }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $databasePasswordSecret.name | squote}}
+                  key: {{ $databasePasswordSecret.key | squote }}
+            {{- else }}
+            {{- with .Values.server.config.database.password | default .Values.configuration.database.password }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+          {{- with mergeOverwrite .Values.global.startupProbe .Values.server.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.livenessProbe .Values.server.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.readinessProbe .Values.server.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.resources .Values.server.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: '/workspace/config'
+              readOnly: true
+          {{- with .Values.server.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- else }}
+      {{- with .Values.server.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: scdf-server
+            items:
+              - key: 'application-kubernetes.yaml'
+                path: 'application-kubernetes.yaml'
+      {{- with .Values.server.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

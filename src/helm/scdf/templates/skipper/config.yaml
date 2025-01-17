@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-skipper
+  labels:
+    app: scdf-skipper
+data:
+  application-kubernetes.yaml: |-
+    logging:
+      level:
+        root: info
+    {{- with mergeOverwrite .Values.global.management .Values.skipper.config.management }}
+    management:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{/* create properties from various configuration spring values to be merged with server.config.spring */}}
+    {{- define "skipper.spring.properties" }}
+    output:
+      ansi:
+        enabled: NEVER
+    cloud:
+    {{- with .Values.configuration.stream.deployer.kubernetes }}
+      deployer:
+        kubernetes:
+          {{- toYaml . | nindent 10 }}
+    {{- end }}
+      {{- with .Values.configuration.stream.platform.kubernetes }}
+      skipper:
+        server:
+          platform:
+            kubernetes:
+              {{- toYaml . | nindent 14 }}
+      {{- end }}
+    {{- end }}
+    {{- $localServerSpring :=  include "server.spring.properties" . | fromYaml }}
+    {{- with .Values.server.config.spring }}
+    {{- with mergeOverwrite $localServerSpring $.Values.server.config.spring }}
+    spring:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- else }}
+    {{- with $localServerSpring }}
+    spring:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- end }}
+    {{- with .Values.skipper.config.server }}
+    server:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}

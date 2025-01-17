@@ -1,0 +1,101 @@
+configuration:
+  streamsEnabled: true
+  tasksEnabled: true
+  composedTaskRunner:
+    image:
+      tag: 2.11.5-SNAPSHOT
+  stream:
+    deployer:
+      kubernetes:
+        imagePullPolicy: IfNotPresent
+        imagePullSecrets: [ private-registry-key, docker-registry-key ]
+  task:
+    deployer:
+      kubernetes:
+        imagePullPolicy: IfNotPresent
+        imagePullSecrets: [ private-registry-key, docker-registry-key ]
+    platform:
+      kubernetes:
+        accounts:
+          default:
+            containerSecurityContext:
+              allowPrivilegeEscalation: true
+            environmentVariables: 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=-1'
+            imagePullPolicy: IfNotPresent
+            imagePullSecret: registry-key
+            requests:
+              cpu: 1500m
+              memory: 1024Mi
+  metrics:
+    dashboard:
+      url: 'http://grafana:3000'
+  broker:
+    type: kafka
+    rabbit:
+      host: rabbitmq.rabbitmq
+    kafka:
+      brokers: "kafka.kafka:9092"
+  database:
+    usernameSecret:
+      name: postgres
+      key: database-username
+    passwordSecret:
+      name: postgres
+      key: database-password
+    url: jdbc://postgresql.postgresql:5432/dataflow
+    driverClassName: org.postgresql.Driver
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# Global values
+global:
+  registry:
+    secret:
+      ref: 'docker-reg-cred'
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: [ docker-reg-cred ]
+  startupProbe:
+    tcpSocket:
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 10
+    timeoutSeconds: 3
+    periodSeconds: 15
+  livenessProbe:
+    httpGet:
+      path: '/actuator/health/liveness'
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+  readinessProbe:
+    httpGet:
+      path: '/actuator/health/readiness'
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+serviceAccount:
+  create: true
+  automount: true
+  name: "scdf-sa"
+
+server:
+  livenessProbe:
+    httpGet:
+      path: '/management/health/liveness'
+  readinessProbe:
+    httpGet:
+      path: '/management/health/readiness'
+
+  service:
+    type: LoadBalancer
+  config:
+    server:
+      forward-headers-strategy: framework
+
+skipper:
+  config:
+    springCloudConfigEnabled: false
+

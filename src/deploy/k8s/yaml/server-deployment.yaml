@@ -140,12 +140,12 @@ spec:
               value: 'GRAFANA'
       serviceAccountName: scdf-sa
       volumes:
-        - name: config
-          configMap:
-            name: scdf-server
-            items:
-              - key: 'application-kubernetes.yaml'
-                path: 'application-kubernetes.yaml'
-        - name: database
-          secret:
-            secretName: ${DATABASE}
+      - name: config
+        configMap:
+          name: scdf-server
+          items:
+          - key: 'application-kubernetes.yaml'
+            path: 'application-kubernetes.yaml'
+      - name: database
+        secret:
+          secretName: ${DATABASE}

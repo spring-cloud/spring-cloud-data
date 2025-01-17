@@ -1,0 +1,9 @@
+configuration:
+  streamsEnabled: true
+  tasksEnabled: true
+  schedulesEnabled: true
+
+serviceAccount:
+  create: true
+  automount: true
+  name: 'scdf-sa'

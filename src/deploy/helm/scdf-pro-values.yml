@@ -1,0 +1,24 @@
+configuration:
+  streamsEnabled: true
+  tasksEnabled: true
+  schedulesEnabled: true
+
+serviceAccount:
+  create: true
+  automount: true
+  name: 'scdf-sa'
+
+global:
+  registry:
+    secret:
+      ref: 'reg-creds-dev-registry'
+
+server:
+  image:
+    repository: dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server
+    tag: 1.6.3-SNAPSHOT
+
+skipper:
+  image:
+    repository: dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper
+    tag: 1.6.3-SNAPSHOT

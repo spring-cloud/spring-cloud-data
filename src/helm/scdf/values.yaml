@@ -1,0 +1,286 @@
+# Default values for scdf.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# Configuration that applies to Spring Cloud Data Flow as a whole.
+configuration:
+  streamsEnabled: true
+  tasksEnabled: true
+  schedulesEnabled: true
+  composedTaskRunner:
+    image:
+      repository: springcloud/spring-cloud-dataflow-composed-task-runner
+      tag: "2.11.5-SNAPSHOT"
+      digest: ""
+  stream:
+    deployer:
+      # entries will be added to spring.cloud.deployer.kubernetes in skipper configuration
+      kubernetes: { }
+    platform:
+      # entries will be added to spring.cloud.skipper.server.platform.kubernetes
+      kubernetes: { }
+  task:
+    deployer:
+      # entries will be added to spring.cloud.deployer.kubernetes in dataflow server configuration
+      kubernetes: { }
+    platform:
+      # entries will be added to spring.cloud.dataflow.task.platform.kubernetes
+      kubernetes: { }
+  metrics:
+    dashboard:
+      url: 'http://grafana:3000'
+  analytics:
+    enabled: true
+  schedules:
+    enabled: true
+  broker:
+    #
+    type: rabbit
+    kafka:
+      # comma separated list of host:port of brokers
+      brokers: ""
+    rabbit:
+      host: ""
+      port: 5672
+      username: ""
+      # userNameSecret contains name and key for referencing username from secret
+      usernameSecret: { }
+      password: ""
+      # passwordSecret contains name and key for referencing password from secret
+      passwordSecret: { }
+  database:
+    url: ""
+    username: ""
+    # userNameSecret contains name and key for referencing username from secret
+    usernameSecret: { }
+    password: ""
+    # passwordSecret contains name and key for referencing password from secret
+    passwordSecret: { }
+    driverClassName: ""
+    testOnBorrow: true
+    validationQuery: ""
+    dialect: ""
+
+# Global values applied to all deployed applications, tasks and stream applications
+global:
+  # Registry secret
+  registry:
+    secret:
+      ref: ""
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: [ ]
+  # will be added to spec.template.spec.securityContext
+  podSecurityContext: { }
+  # will be added to spec.template.spec.containers.securityContext
+  securityContext: { }
+  startupProbe:
+    tcpSocket:
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 10
+    timeoutSeconds: 3
+    periodSeconds: 15
+  livenessProbe:
+    httpGet:
+      path: '/actuator/health/liveness'
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+  readinessProbe:
+    httpGet:
+      path: '/actuator/health/readiness'
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+  resources: { }
+  # will be applied to management of server and skipper config
+  management:
+    metrics:
+      export:
+        prometheus:
+          enabled: false
+          rsocket:
+            enabled: false
+            host: prometheus-rsocket-proxy
+            port: 7001
+    defaults:
+      metrics:
+        export:
+          enabled: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: 'scdf-sa'
+
+# Values used in Spring Cloud Data Flow Server deployment, configuration and service
+server:
+  image:
+    repository: 'springcloud/spring-cloud-dataflow-server'
+    tag: '2.11.5'
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: [ ]
+  contextPath: ""
+  containerPort: 9393
+  protocol: TCP
+  podAnnotations: { }
+  podLabels: { }
+  # will be added to spec.template.spec.securityContext
+  podSecurityContext: { }
+  # will be added to spec.template.spec.containers.securityContext
+  securityContext: { }
+
+  resources:
+    requests:
+      cpu: 1500m
+      memory: 2048Mi
+  #    We usually recommend not to specify default resources and to leave this as a conscious
+  #    choice for the user after monitoring performance.
+  #    limits:
+  #      cpu: 4000m
+  #      memory: 4096Mi
+  startupProbe: { }
+  livenessProbe:
+    httpGet:
+      path: '/management/health/liveness'
+  readinessProbe:
+    httpGet:
+      path: '/management/health/readiness'
+  # If a volume named config will be added and mounted in /workspace/config
+  volumes: [ ]
+  volumeMounts: [ ]
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+  # will become part of configmap for scdf-server.
+  # configure spring.cloud.dataflow.task.platform properties below in configuration section
+  config:
+    springCloudConfigEnabled: false
+    springCloudKubernetesEnableApi: false
+    springCloudKubernetesSecretsEnableApi: false
+    management: { }
+    spring: { }
+    server: { }
+    database:
+      url: ""
+      username: ""
+        # userNameSecret contains name and key for referencing username from secret
+      usernameSecret: { }
+      password: ""
+      # passwordSecret contains name and key for referencing password from secret
+      passwordSecret: { }
+      driverClassName: ""
+      testOnBorrow: true
+      validationQuery: ""
+      dialect: ""
+    # usually http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}"
+    serverUri: ""
+    # usually "http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api"
+    skipperUri: ""
+  service:
+    type: LoadBalancer
+    port: 9393
+
+
+# Values in Spring Cloud Skipper deployment, configuration and service
+skipper:
+  image:
+    repository: 'springcloud/spring-cloud-skipper'
+    tag: '2.11.5'
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: [ ]
+  contextPath: ""
+  containerPort: 7577
+  protocol: TCP
+  podAnnotations: { }
+  podLabels: { }
+  # will be added to spec.template.spec.securityContext
+  podSecurityContext: { }
+  # will be added to spec.template.spec.containers.securityContext
+  securityContext: { }
+
+  resources:
+    requests:
+      cpu: 1500m
+      memory: 2048Mi
+  #    We usually recommend not to specify default resources and to leave this as a conscious
+  #    choice for the user. This also increases chances charts run on environments with little
+  #    resources, such as Minikube. If you do want to specify resources, uncomment the following
+  #    lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  #    limit:
+  #      cpu: 4000m
+  #      memory: 4096Mi
+  startupProbe:
+    tcpSocket:
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 10
+    timeoutSeconds: 3
+    periodSeconds: 15
+  livenessProbe:
+    httpGet:
+      path: '/actuator/health/liveness'
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+  readinessProbe:
+    httpGet:
+      path: '/actuator/health/readiness'
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    timeoutSeconds: 3
+    periodSeconds: 15
+  # If you override volumes you should include the following section unless you to not want to use the ConfigMap named scdf-server
+  #   - name: config
+  #     configMap:
+  #       name: scdf-skipper
+  #       items:
+  #         - key: 'application-kubernetes.yaml'
+  #           path: 'application-kubernetes.yaml'
+  volumes: [ ]
+  #If you override volumeMounts you should include the following section unless you want to skip config or use a different mapping.
+  #  - name: config
+  #    mountPath: /workspace/config
+  #    readOnly: true
+  volumeMounts: [ ]
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+  # will become part of configmap for scdf-skipper.
+  # configure spring.cloud.skipper.server.platform below in configuration section
+  config:
+    springCloudConfigEnabled: false
+    springCloudKubernetesEnableApi: false
+    springCloudKubernetesSecretsEnableApi: false
+    management: { }
+    spring: { }
+    server: { }
+    database:
+      url:
+      username:
+      # userNameSecret contains name and key for referencing username from secret
+      usernameSecret: { }
+      password:
+      # passwordSecret contains name and key for referencing password from secret
+      passwordSecret:
+      driverClassName:
+      testOnBorrow:
+      validationQuery:
+      dialect:
+  service:
+    type: ClusterIP
+    port: http

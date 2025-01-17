@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: scdf-skipper
+  labels:
+    {{- include "scdf.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.skipper.service.type }}
+  ports:
+    - port: {{ default .Values.skipper.service.port 7577 }}
+      targetPort: {{ default .Values.skipper.service.port 7577 }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "scdf.selectorLabels" . | nindent 4 }}

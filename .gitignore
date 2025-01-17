@@ -67,3 +67,4 @@ workspace/
 /srp*gz
 /observer/*
 
+src/helm/output/

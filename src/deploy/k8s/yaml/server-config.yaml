@@ -12,7 +12,7 @@ data:
         org.springframework: debug
     management:
       defaults:
-        metrics:
+        metrics:          
           export:
             enabled: false
     maven:
