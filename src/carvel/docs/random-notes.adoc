@@ -6,8 +6,8 @@ What's inside package and package repository bundles.
 
 [source, bash]
 ----
-imgpkg pull -b springcloud/scdf-oss-repo:2.11.3-SNAPSHOT -o scdf-oss-repo-snapshot
-imgpkg pull -b springcloud/scdf-oss-package:2.11.3-SNAPSHOT -o scdf-package-snapshot
+imgpkg pull -b springcloud/scdf-oss-repo:3.0.0-SNAPSHOT -o scdf-oss-repo-snapshot
+imgpkg pull -b springcloud/scdf-oss-package:3.0.0-SNAPSHOT -o scdf-package-snapshot
 ----
 
 == Some debug notes

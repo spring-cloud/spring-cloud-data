@@ -40,7 +40,7 @@ services:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
 
       # Override the CTR form maven to docker
-      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}${BP_JVM_VERSION:-}
+      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-3.0.0-SNAPSHOT}${BP_JVM_VERSION:-}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
     entrypoint: >
       /bin/sh -c "
@@ -77,7 +77,7 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';               
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}' --no-check-certificate --post-data='uri=docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}${BP_JVM_VERSION:-}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-3.0.0-SNAPSHOT}' --no-check-certificate --post-data='uri=docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-3.0.0-SNAPSHOT}${BP_JVM_VERSION:-}';
         echo 'Docker Stream apps imported'"
 
   app-import-task:

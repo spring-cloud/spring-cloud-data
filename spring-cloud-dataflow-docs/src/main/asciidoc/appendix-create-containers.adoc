@@ -43,7 +43,7 @@ Downloads all applications needed by `create-containers.sh` from Maven repositor
 
 Usage: `download-apps.sh [version]`
 
-* `version` is the dataflow-server version like `2.11.3`. Default is `2.11.3-SNAPSHOT`
+* `version` is the dataflow-server version like `2.11.3`. Default is `3.0.0-SNAPSHOT`
 
 ===== `src/local/create-containers.sh`
 Creates all containers and pushes to local docker registry.
@@ -52,8 +52,8 @@ This script requires link:https://github.com/GoogleContainerTools/jib/tree/maste
 
 Usage: `create-containers.sh [version] [jre-version]`
 
-* `version` is the dataflow-server version like `2.11.3`. Default is `2.11.3-SNAPSHOT`
-* `jre-version` should be one of 11, 17. Default is 11
+* `version` is the dataflow-server version like `3.0.0`. Default is `3.0.0-SNAPSHOT`
+* `jre-version` should be one of 17, 21. Default is 17
 
 ==== Scripts in `spring-cloud-skipper`
 
@@ -64,7 +64,7 @@ Downloads all applications needed by `create-containers.sh` from Maven repositor
 
 Usage: `download-app.sh [version]`
 
-* `version` is the skipper version like `2.11.3` or default is `2.11.3-SNAPSHOT`
+* `version` is the skipper version like `3.0.0` or default is `3.0.0-SNAPSHOT`
 
 ===== `local/create-container.sh`
 Creates all containers and pushes to local docker registry.
@@ -72,8 +72,8 @@ This script requires link:https://github.com/GoogleContainerTools/jib/tree/maste
 
 Usage: `create-containers.sh [version] [jre-version]`
 
-* `version` is the skipper version like `2.11.3` or default is `2.11.3-SNAPSHOT`
-* `jre-version` should be one of 11, 17
+* `version` is the skipper version like `3.0.0` or default is `3.0.0-SNAPSHOT`
+* `jre-version` should be one of 17, 21
 
 ==== Scripts in `stream-applications`
 
@@ -85,36 +85,7 @@ Downloads all applications needed by `create-containers.sh` from Maven repositor
 
 Usage: `download-apps.sh [version] [broker] [filter]`
 
-* `version` is the stream applications version like `4.0.0` or default is `4.0.1-SNAPSHOT`
+* `version` is the stream applications version like `5.0.0` or default is `5.0.1-SNAPSHOT`
 * `broker` is one of rabbitmq, rabbit or kafka
 * `filter` is a name of an application or a partial name that will be matched.
 
-===== `local/create-containers.sh`
-Creates all containers and pushes to local docker registry.
-
-This script requires link:https://github.com/GoogleContainerTools/jib/tree/master/jib-cli[jib-cli]
-
-Usage: `create-containers.sh [version] [broker] [jre-version] [filter]`
-
-* `version` is the stream-applications version like `4.0.0` or default is `4.0.1-SNAPSHOT`
-* `broker` is one of rabbitmq, rabbit or kafka
-* `jre-version` must be 17
-* `filter` is a name of an application or a partial name that will be matched.
-
-If the file is not present required to create the container the script will skip the one.
-
-===== `local/pack-containers.sh`
-Creates all containers and pushes to local docker registry.
-
-This script requires link:https://buildpacks.io/docs/tools/pack[packeto pack]
-
-Usage: `pack-containers.sh [version] [broker] [jre-version] [filter]`
-
-* `version` is the stream-applications version like `4.0.0` or default is `4.0.1-SNAPSHOT`
-* `broker` is one of rabbitmq, rabbit or kafka
-* `jre-version` must be 17
-* `filter` is a name of an application or a partial name that will be matched.
-
-If the required file is not present to create the container the script will skip that one.
-
-NOTE: If any parameter is provided all those to the left of it should be considered required.

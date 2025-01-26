@@ -8,7 +8,7 @@ spec:
   packageRef:
     refName: scdf.tanzu.vmware.com
     versionSelection:
-      constraints: 2.11.3-SNAPSHOT
+      constraints: 3.0.0-SNAPSHOT
       prereleases: {}
   values:
   - secretRef:

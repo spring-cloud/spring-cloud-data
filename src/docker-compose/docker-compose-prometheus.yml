@@ -36,13 +36,13 @@ services:
       - micrometer.prometheus-proxy.tcp-port=7001
 
   grafana:
-    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}
+    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:-3.0.0-SNAPSHOT}
     container_name: grafana
     ports:
       - '3000:3000'
 
   prometheus:
-    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:-3.0.0-SNAPSHOT}
     container_name: prometheus
     ports:
       - '9090:9090'

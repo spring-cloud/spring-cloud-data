@@ -27,14 +27,14 @@ scdf-snapshot.tanzu.vmware    2m35s   Reconcile succeeded
 
 kubectl get packages
 NAME                                   PACKAGEMETADATA NAME    VERSION          AGE
-scdf.tanzu.vmware.com.2.11.3-SNAPSHOT  scdf.tanzu.vmware.com   2.11.3-SNAPSHOT   2m23s
+scdf.tanzu.vmware.com.3.0.0-SNAPSHOT  scdf.tanzu.vmware.com   3.0.0-SNAPSHOT   2m23s
 ----
 
 NOTE: Above package and package repos are defined within public repos on a
 VMWare space so you don't get trouble with rate limiting(which would be
 a case with dockerhub).
 
-Install `2.11.3-SNAPSHOT` with `postgres` and `rabbit`:
+Install `3.0.0-SNAPSHOT` with `postgres` and `rabbit`:
 
 [source, bash]
 ----
@@ -45,9 +45,9 @@ kapp deploy \
 
 kubectl get packageinstalls
 NAME        PACKAGE NAME            PACKAGE VERSION   DESCRIPTION   AGE
-scdf-demo   scdf.tanzu.vmware.com   2.11.3-SNAPSHOT   Reconciling   12s
+scdf-demo   scdf.tanzu.vmware.com   3.0.0-SNAPSHOT   Reconciling   12s
 
 kubectl get packageinstalls
 NAME        PACKAGE NAME            PACKAGE VERSION   DESCRIPTION           AGE
-scdf-demo   scdf.tanzu.vmware.com   2.11.3-SNAPSHOT   Reconcile succeeded   88s
+scdf-demo   scdf.tanzu.vmware.com   3.0.0-SNAPSHOT   Reconcile succeeded   88s
 ----

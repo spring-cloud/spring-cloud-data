@@ -25,7 +25,7 @@ Install _Dataflow_ with configured _GitHub Container Registry_ secrets:
 ----
 tanzu package install scdf-demo \
   --package-name scdf.tanzu.vmware.com \
-  --version 2.11.3-SNAPSHOT \
+  --version 3.0.0-SNAPSHOT \
   --values-file scdf-values.yml
 ----
 
@@ -39,7 +39,7 @@ Copy source, sink and task:
 [source, bash]
 ----
 imgpkg copy \
-  -b springcloud/scdf-oss-repo:2.11.3-SNAPSHOT \
+  -b springcloud/scdf-oss-repo:3.0.0-SNAPSHOT \
   --to-repo ghcr.io/jvalkeal/private/scdf-oss-repo
 
 imgpkg copy \

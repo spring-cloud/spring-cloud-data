@@ -35,7 +35,7 @@ services:
     profiles:
       - skipper
     user: root
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.3-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-3.0.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"

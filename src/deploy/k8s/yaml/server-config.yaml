@@ -40,6 +40,7 @@ data:
               kubernetes:
                 accounts:
                   default:
+                    maximumConcurrentTasks: 100
                     environmentVariables: 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=-1'
                     imagePullPolicy: IfNotPresent
                     imagePullSecret: registry-key

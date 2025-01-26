@@ -139,8 +139,8 @@ This example shows the versions of the current development snapshot.
 
 [source,shell]
 ....
-export DATAFLOW_VERSION=2.11.5-SNAPSHOT
-export SKIPPER_VERSION=2.11.5-SNAPSHOT
+export DATAFLOW_VERSION=3.0.0-SNAPSHOT
+export SKIPPER_VERSION=3.0.0-SNAPSHOT
 ....
 
 Before you can install SCDF you will need to pull the following images to ensure they are present for uploading to the k8s cluster.

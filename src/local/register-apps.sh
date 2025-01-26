@@ -39,8 +39,7 @@ else
     BROKER_NAME=$BROKER
 fi
 if [ "$STREAM_APPS_RT_VERSION" = "" ]; then
-    export STREAM_APPS_RT_VERSION=2021.1.2 # release for Boot 2.x
-    # export STREAM_APPS_RT_VERSION=2022.0.0 # release for Boot 3.x apps
+    export STREAM_APPS_RT_VERSION=2024.0.0
 fi
 echo "STREAM_APPS_RT_VERSION=$STREAM_APPS_RT_VERSION"
 TYPE=maven
@@ -67,12 +66,6 @@ fi
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 dataflow_post "uri=$DESCRIPTORS" "$DATAFLOW_IP/apps"
 
-dataflow_post "uri=maven:io.spring:timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
-dataflow_post "uri=maven:io.spring:timestamp-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp3?bootVersion=3"
-dataflow_post "uri=maven:io.spring:timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"
-dataflow_post "uri=maven:io.spring:timestamp-batch-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp-batch3?bootVersion=3"
-dataflow_post "uri=maven:io.spring:scenario-task:0.0.1-SNAPSHOT" "$DATAFLOW_IP/apps/task/scenario/0.0.1-SNAPSHOT"
-dataflow_post "uri=maven:org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.2-SNAPSHOT" "$DATAFLOW_IP/apps/task/batch-remote-partition/0.0.2-SNAPSHOT"
-dataflow_post "uri=maven:org.springframework.cloud.stream.app:log-sink-$BROKER_NAME:3.0.1" "$DATAFLOW_IP/apps/sink/ver-log/3.0.1"
-dataflow_post "uri=maven:org.springframework.cloud.stream.app:log-sink-$BROKER_NAME:2.1.5.RELEASE" "$DATAFLOW_IP/apps/sink/ver-log/2.1.5.RELEASE"
-dataflow_post "uri=maven:io.spring.task:task-demo-metrics-prometheus:2.0.1-SNAPSHOT" "$DATAFLOW_IP/apps/task/task-demo-metrics-prometheus/2.0.1-SNAPSHOT"
+dataflow_post "uri=maven:io.spring:timestamp-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp"
+dataflow_post "uri=maven:io.spring:timestamp-batch-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp-batch"
+

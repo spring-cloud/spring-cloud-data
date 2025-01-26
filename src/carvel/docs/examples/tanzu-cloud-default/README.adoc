@@ -18,13 +18,13 @@ repository. If you look `scdf-values.yml` it simply uses defaults and defines
 _Dataflow_ server service type as `LoadBalancer` which is probably something
 you need if wanting to access server publicly.
 
-Setup repo `2.11.3-SNAPSHOT` repo:
+Setup repo `3.0.0-SNAPSHOT` repo:
 
 [source, bash]
 ----
 tanzu package install scdf-demo \
   --package-name scdf.tanzu.vmware.com \
-  --version 2.11.3-SNAPSHOT \
+  --version 3.0.0-SNAPSHOT \
   --values-file scdf-values.yml
 ----
 

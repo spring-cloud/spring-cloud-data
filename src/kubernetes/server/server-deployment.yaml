@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server:2.11.3-SNAPSHOT
+        image: springcloud/spring-cloud-dataflow-server:3.0.0-SNAPSHOT
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
@@ -68,7 +68,7 @@ spec:
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
           value: 'true'
         - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
-          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.11.3-SNAPSHOT'
+          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:3.0.0-SNAPSHOT'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API

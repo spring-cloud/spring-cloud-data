@@ -580,7 +580,7 @@ The following YAML snippet from a Deployment is an example of mounting a ConfigM
 ...
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server:2.11.3-SNAPSHOT
+        image: springcloud/spring-cloud-dataflow-server:3.0.0-SNAPSHOT
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
