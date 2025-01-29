@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -53,10 +54,17 @@ class BootApplicationConfigurationMetadataResolverTests {
 
 	private ApplicationConfigurationMetadataResolver resolver;
 
+	private AutoCloseable autoCloseable;
+
 	@BeforeEach
 	void init() {
-		MockitoAnnotations.initMocks(this);
+		autoCloseable = MockitoAnnotations.openMocks(this);
 		resolver = new BootApplicationConfigurationMetadataResolver(containerImageMetadataResolver);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		autoCloseable.close();
 	}
 
 	@Test

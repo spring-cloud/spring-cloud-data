@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -69,9 +70,12 @@ class DefaultContainerImageMetadataResolverTest {
 
 	private ContainerRegistryService containerRegistryService;
 
+	private AutoCloseable autoCloseable;
+
+
 	@BeforeEach
 	void init() {
-		MockitoAnnotations.initMocks(this);
+		autoCloseable = MockitoAnnotations.openMocks(this);
 
 		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean(), anyMap())).thenReturn(mockRestTemplate);
 
@@ -94,6 +98,11 @@ class DefaultContainerImageMetadataResolverTest {
 
 		this.containerRegistryService = new ContainerRegistryService(containerImageRestTemplateFactory,
 				new ContainerImageParser(), registryConfigurationMap, Collections.singletonList(registryAuthorizer));
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		autoCloseable.close();
 	}
 
 	@Test

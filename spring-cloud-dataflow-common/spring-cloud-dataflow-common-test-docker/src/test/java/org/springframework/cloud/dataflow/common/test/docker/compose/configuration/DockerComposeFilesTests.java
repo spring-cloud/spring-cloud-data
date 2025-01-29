@@ -23,10 +23,11 @@ import java.util.List;
 import org.assertj.core.api.Condition;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class DockerComposeFilesTests {
@@ -34,23 +35,17 @@ public class DockerComposeFilesTests {
 	@Rule
 	public final TemporaryFolder tempFolder = new TemporaryFolder();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void throw_exception_when_compose_file_is_not_specified() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("A docker compose file must be specified.");
-		DockerComposeFiles.from();
+		assertThatIllegalStateException().isThrownBy(DockerComposeFiles::from).
+			withMessageContaining("A docker compose file must be specified.");
 	}
 
 	@Test
 	public void throw_exception_when_compose_file_does_not_exist() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("The following docker-compose files:");
-		exception.expectMessage("does-not-exist.yaml");
-		exception.expectMessage("do not exist.");
-		DockerComposeFiles.from("does-not-exist.yaml");
+		assertThatIllegalStateException().isThrownBy(() -> DockerComposeFiles.from("does-not-exist.yaml")).
+			withMessageContaining("The following docker-compose files:").withMessageContaining("does-not-exist.yaml").
+			withMessageContaining("do not exist.");
 	}
 
 	@Test
@@ -98,9 +93,8 @@ public class DockerComposeFilesTests {
 
 	@Test
 	public void testFromClasspathDoesNotExist() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Can't find resource classpath:does-not-exist.yaml");
-		DockerComposeFiles.from("classpath:does-not-exist.yaml");
+		assertThatIllegalArgumentException().isThrownBy(() -> DockerComposeFiles.from("classpath:does-not-exist.yaml")).
+			withMessageContaining("Can't find resource classpath:does-not-exist.yaml");
 	}
 
 	private static Condition<String> is(String value) {

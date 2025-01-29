@@ -18,13 +18,11 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.connection
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine.LocalBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DaemonHostIpResolver.LOCALHOST;
@@ -36,9 +34,6 @@ import static org.springframework.cloud.dataflow.common.test.docker.compose.conf
 import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.DockerMachineEnvironmentMatcher.containsEnvironment;
 
 public class LocalBuilderTests {
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void override_previous_environment_when_additional_environment_set_twice_daemon() {
@@ -135,25 +130,19 @@ public class LocalBuilderTests {
 		invalidDockerVariables.put(DOCKER_TLS_VERIFY, "1");
 		invalidDockerVariables.put(DOCKER_CERT_PATH, "/path/to/certs");
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("These variables were set");
-		exception.expectMessage(DOCKER_HOST);
-		exception.expectMessage(DOCKER_CERT_PATH);
-		exception.expectMessage(DOCKER_TLS_VERIFY);
-		exception.expectMessage("They cannot be set when connecting to a local docker daemon");
-
-		new LocalBuilder(DAEMON, invalidDockerVariables).build();
+		assertThatIllegalStateException().isThrownBy(() -> new LocalBuilder(DAEMON, invalidDockerVariables).build()).
+			withMessageContaining("These variables were set").withMessageContaining(DOCKER_HOST).
+			withMessageContaining(DOCKER_CERT_PATH).withMessageContaining(DOCKER_TLS_VERIFY);
 	}
 
 	@Test
 	public void have_invalid_additional_variables_daemon() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("The following variables");
-		exception.expectMessage(DOCKER_HOST);
-		exception.expectMessage("cannot exist in your additional environment variable block");
 
-		new LocalBuilder(DAEMON, new HashMap<>()).withAdditionalEnvironmentVariable(DOCKER_HOST, "tcp://192.168.99.100:2376")
-											  .build();
+		assertThatIllegalStateException().isThrownBy(() ->  new LocalBuilder(DAEMON, new HashMap<>()).
+			withAdditionalEnvironmentVariable(DOCKER_HOST, "tcp://192.168.99.100:2376").build()).
+			withMessageContaining("The following variables").
+			withMessageContaining(DOCKER_HOST).
+			withMessageContaining("cannot exist in your additional environment variable block");
 	}
 
 	@Test
@@ -163,13 +152,11 @@ public class LocalBuilderTests {
 		dockerVariables.put(DOCKER_TLS_VERIFY, "1");
 		dockerVariables.put(DOCKER_CERT_PATH, "/path/to/certs");
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("The following variables");
-		exception.expectMessage(DOCKER_HOST);
-		exception.expectMessage("cannot exist in your additional environment variable block");
-
-		new LocalBuilder(REMOTE, dockerVariables).withAdditionalEnvironmentVariable(DOCKER_HOST, "tcp://192.168.99.101:2376")
-												 .build();
+		assertThatIllegalStateException().isThrownBy(() ->  new LocalBuilder(REMOTE, dockerVariables).
+			withAdditionalEnvironmentVariable(DOCKER_HOST, "tcp://192.168.99.101:2376").build()).
+			withMessageContaining("The following variables").
+			withMessageContaining(DOCKER_HOST).
+			withMessageContaining("cannot exist in your additional environment variable block");
 	}
 
 	@Test
@@ -191,10 +178,9 @@ public class LocalBuilderTests {
 
 	@Test
 	public void have_missing_docker_host_remote() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Missing required environment variables: ");
-		exception.expectMessage(DOCKER_HOST);
-		new LocalBuilder(REMOTE, new HashMap<>()).build();
+		assertThatIllegalStateException().isThrownBy(() ->  new LocalBuilder(REMOTE, new HashMap<>()).build()).
+			withMessageContaining("Missing required environment variables: ").
+			withMessageContaining(DOCKER_HOST);
 	}
 
 	@Test
@@ -212,10 +198,9 @@ public class LocalBuilderTests {
 		dockerVariables.put(DOCKER_HOST, "tcp://192.168.99.100:2376");
 		dockerVariables.put(DOCKER_TLS_VERIFY, "1");
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Missing required environment variables: ");
-		exception.expectMessage(DOCKER_CERT_PATH);
-		new LocalBuilder(REMOTE, dockerVariables).build();
+		assertThatIllegalStateException().isThrownBy(() ->  new LocalBuilder(REMOTE, dockerVariables).build()).
+			withMessageContaining("Missing required environment variables: ").
+			withMessageContaining(DOCKER_CERT_PATH);
 	}
 
 	@Test

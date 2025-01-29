@@ -20,10 +20,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doThrow;
@@ -32,18 +33,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+
 public class ConflictingContainerRemovingDockerComposeTests {
 	private final DockerCompose dockerCompose = mock(DockerCompose.class);
 	private final Docker docker = mock(Docker.class);
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void require_retry_attempts_to_be_at_least_1() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("retryAttempts must be at least 1, was 0");
-		new ConflictingContainerRemovingDockerCompose(dockerCompose, docker, 0);
+		assertThatIllegalStateException().isThrownBy(()-> new ConflictingContainerRemovingDockerCompose(dockerCompose, docker, 0)).
+			withMessageContaining("retryAttempts must be at least 1, was 0");
 	}
 
 	@Test
@@ -107,10 +105,9 @@ public class ConflictingContainerRemovingDockerComposeTests {
 				.when(dockerCompose).up();
 		doThrow(RuntimeException.class).when(docker).rm(anySet());
 
-		exception.expect(RuntimeException.class);
 		ConflictingContainerRemovingDockerCompose conflictingContainerRemovingDockerCompose = new ConflictingContainerRemovingDockerCompose(
 				dockerCompose, docker);
-		conflictingContainerRemovingDockerCompose.up();
+		assertThatRuntimeException().isThrownBy(conflictingContainerRemovingDockerCompose::up);
 	}
 
 	@Test
@@ -119,11 +116,10 @@ public class ConflictingContainerRemovingDockerComposeTests {
 		doThrow(new DockerExecutionException("The name \"" + conflictingContainer + "\" is already in use"))
 				.when(dockerCompose).up();
 
-		exception.expect(DockerExecutionException.class);
-		exception.expectMessage("docker-compose up failed");
 		ConflictingContainerRemovingDockerCompose conflictingContainerRemovingDockerCompose = new ConflictingContainerRemovingDockerCompose(
 				dockerCompose, docker);
-		conflictingContainerRemovingDockerCompose.up();
+		assertThatExceptionOfType(DockerExecutionException.class).isThrownBy(() -> conflictingContainerRemovingDockerCompose.up()).
+			withMessageContaining("docker-compose up failed");
 	}
 
 	@Test

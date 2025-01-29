@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -57,11 +58,18 @@ class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 
 	private DockerConfigJsonSecretToRegistryConfigurationConverter converter;
 
+	private AutoCloseable autoCloseable;
+	
 	@BeforeEach
 	void init() {
-		MockitoAnnotations.initMocks(this);
+		autoCloseable = MockitoAnnotations.openMocks(this);
 		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean(), anyMap())).thenReturn(mockRestTemplate);
 		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(new ContainerRegistryProperties(), containerImageRestTemplateFactory);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		autoCloseable.close();
 	}
 
 	@Test

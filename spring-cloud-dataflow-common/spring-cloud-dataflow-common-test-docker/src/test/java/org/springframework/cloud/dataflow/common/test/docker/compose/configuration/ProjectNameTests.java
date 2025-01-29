@@ -17,16 +17,12 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.configurat
 
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 public class ProjectNameTests {
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void use_project_name_prefix_in_construct_compose_command() {
@@ -64,16 +60,14 @@ public class ProjectNameTests {
 
     @Test
     public void reject_blanks_in_from_string() {
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("ProjectName must not be blank.");
-        ProjectName.fromString(" ");
+        assertThatIllegalStateException().isThrownBy(() -> ProjectName.fromString(" ")).
+			withMessageContaining("ProjectName must not be blank.");
     }
 
     @Test
     public void match_validation_behavior_of_docker_compose_cli() {
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("ProjectName 'Crazy#Proj ect!Name' not allowed, please use lowercase letters and numbers only.");
-        ProjectName.fromString("Crazy#Proj ect!Name");
+		assertThatIllegalStateException().isThrownBy(() -> ProjectName.fromString("Crazy#Proj ect!Name")).
+			withMessageContaining("ProjectName 'Crazy#Proj ect!Name' not allowed, please use lowercase letters and numbers only.");
     }
 
     @Test

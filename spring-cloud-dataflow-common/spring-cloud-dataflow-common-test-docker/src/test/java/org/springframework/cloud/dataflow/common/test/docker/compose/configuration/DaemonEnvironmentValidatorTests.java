@@ -15,21 +15,17 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DaemonEnvironmentValidator;
-
 public class DaemonEnvironmentValidatorTests {
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void validate_successfully_when_docker_environment_does_not_contain_docker_variables() {
@@ -47,13 +43,9 @@ public class DaemonEnvironmentValidatorTests {
 		variables.put(DOCKER_TLS_VERIFY, "1");
 		variables.put(DOCKER_CERT_PATH, "/path/to/certs");
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("These variables were set:");
-		exception.expectMessage(DOCKER_HOST);
-		exception.expectMessage(DOCKER_CERT_PATH);
-		exception.expectMessage(DOCKER_TLS_VERIFY);
-		exception.expectMessage("They cannot be set when connecting to a local docker daemon");
-		DaemonEnvironmentValidator.instance().validateEnvironmentVariables(variables);
+		assertThatIllegalStateException().isThrownBy( () -> DaemonEnvironmentValidator.instance().validateEnvironmentVariables(variables)).
+			withMessageContaining(DOCKER_HOST).withMessageContaining(DOCKER_CERT_PATH).withMessageContaining(DOCKER_TLS_VERIFY).
+			withMessageContaining("They cannot be set when connecting to a local docker daemon");
 	}
 
 }

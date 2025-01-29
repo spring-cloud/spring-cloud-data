@@ -15,35 +15,27 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.TCP_PROTOCOL;
-
-import org.hamcrest.Matchers;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.RemoteHostIpResolver;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.TCP_PROTOCOL;
 
 public class RemoteHostIpResolverTests {
 
     private static final String IP = "192.168.99.100";
     private static final int PORT = 2376;
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     @Test
     public void result_in_error_blank_when_resolving_invalid_docker_host() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("DOCKER_HOST cannot be blank/null");
-        new RemoteHostIpResolver().resolveIp("");
+		assertThatIllegalArgumentException().isThrownBy(() ->new RemoteHostIpResolver().resolveIp("")).
+			withMessageContaining("DOCKER_HOST cannot be blank/null");
     }
 
     @Test
     public void result_in_error_null_when_resolving_invalid_docker_host() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("DOCKER_HOST cannot be blank/null");
-        new RemoteHostIpResolver().resolveIp(null);
+		assertThatIllegalArgumentException().isThrownBy(() -> new RemoteHostIpResolver().resolveIp(null)).
+			withMessageContaining("DOCKER_HOST cannot be blank/null");
     }
 
     @Test

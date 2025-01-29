@@ -17,15 +17,13 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.connection
 
 import java.io.IOException;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.MockDockerEnvironment;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -40,9 +38,6 @@ import static org.springframework.cloud.dataflow.common.test.docker.compose.conn
 public class ContainerTests {
 
     private static final String IP = "127.0.0.1";
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     private final Docker docker = mock(Docker.class);
     private final DockerCompose dockerCompose = mock(DockerCompose.class);
@@ -94,18 +89,16 @@ public class ContainerTests {
             throws Exception {
         // Service must have ports otherwise we end up with an exception telling you the service is listening at all
         env.availableService("service", IP, 5400, 5400);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("No port mapped externally to '5432' for container 'service'");
-        container.portMappedExternallyTo(5432);
+        assertThatIllegalArgumentException().isThrownBy(() -> container.portMappedExternallyTo(5432)).
+			withMessageContaining("No port mapped externally to '5432' for container 'service'");
     }
 
     @Test
     public void throw_illegal_argument_exception_when_a_port_for_an_unknown_internal_port_is_requested()
             throws Exception {
         env.availableService("service", IP, 5400, 5400);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("No internal port '5432' for container 'service'");
-        container.port(5432);
+		assertThatIllegalArgumentException().isThrownBy(() -> container.port(5432)).
+			withMessageContaining("No internal port '5432' for container 'service'");
     }
 
     @Test

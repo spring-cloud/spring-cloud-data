@@ -15,31 +15,27 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.RemoteEnvironmentValidator;
-
 public class RemoteEnvironmentValidatorTests {
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void throw_exception_if_docker_host_is_not_set() {
 		Map<String, String> variables = new HashMap<>();
 		variables.put("SOME_VARIABLE", "SOME_VALUE");
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Missing required environment variables: ");
-		exception.expectMessage(DOCKER_HOST);
-		RemoteEnvironmentValidator.instance().validateEnvironmentVariables(variables);
+		assertThatIllegalStateException().isThrownBy(() -> RemoteEnvironmentValidator.instance().
+			validateEnvironmentVariables(variables)).
+			withMessageContaining("Missing required environment variables: ").
+			withMessageContaining(DOCKER_HOST);
 	}
 
 	@Test
@@ -48,10 +44,10 @@ public class RemoteEnvironmentValidatorTests {
 		variables.put(DOCKER_HOST, "tcp://192.168.99.100:2376");
 		variables.put(DOCKER_TLS_VERIFY, "1");
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Missing required environment variables: ");
-		exception.expectMessage(DOCKER_CERT_PATH);
-		RemoteEnvironmentValidator.instance().validateEnvironmentVariables(variables);
+		assertThatIllegalStateException().isThrownBy(() -> RemoteEnvironmentValidator.instance().
+			validateEnvironmentVariables(variables)).
+			withMessageContaining("Missing required environment variables: ").
+			withMessageContaining(DOCKER_CERT_PATH);
 	}
 
 	@Test

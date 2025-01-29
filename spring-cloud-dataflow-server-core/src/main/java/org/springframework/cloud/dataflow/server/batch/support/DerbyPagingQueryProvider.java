@@ -17,6 +17,8 @@
 package org.springframework.cloud.dataflow.server.batch.support;
 
 import javax.sql.DataSource;
+import java.sql.DatabaseMetaData;
+
 import org.springframework.cloud.dataflow.server.batch.DataflowSqlPagingQueryProvider;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -40,7 +42,7 @@ public class DerbyPagingQueryProvider extends SqlWindowingPagingQueryProvider {
 	@Override
 	public void init(DataSource dataSource) throws Exception {
 		super.init(dataSource);
-		String version = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductVersion").toString();
+		String version = JdbcUtils.extractDatabaseMetaData(dataSource, DatabaseMetaData::getDatabaseProductVersion);
 		if (!isDerbyVersionSupported(version)) {
 			throw new InvalidDataAccessResourceUsageException("Apache Derby version " + version + " is not supported by this class,  Only version " + MINIMAL_DERBY_VERSION + " or later is supported");
 		}
@@ -51,8 +53,8 @@ public class DerbyPagingQueryProvider extends SqlWindowingPagingQueryProvider {
 		String[] minimalVersionParts = MINIMAL_DERBY_VERSION.split("\\.");
 		String[] versionParts = version.split("[\\. ]");
 		for (int i = 0; i < minimalVersionParts.length; i++) {
-			int minimalVersionPart = Integer.valueOf(minimalVersionParts[i]);
-			int versionPart = Integer.valueOf(versionParts[i]);
+			int minimalVersionPart = Integer.parseInt(minimalVersionParts[i]);
+			int versionPart = Integer.parseInt(versionParts[i]);
 			if (versionPart < minimalVersionPart) {
 				return false;
 			} else if (versionPart > minimalVersionPart) {

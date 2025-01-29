@@ -16,13 +16,11 @@
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
 import org.joda.time.Duration;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Cluster;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerCache;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,9 +41,6 @@ public class ClusterWaitTests {
             .ip(IP)
             .build();
 
-    @Rule public ExpectedException exception = ExpectedException.none();
-
-
     @Test public void
     return_when_a_cluster_is_ready() throws InterruptedException {
         when(clusterHealthCheck.isClusterHealthy(cluster)).thenReturn(success());
@@ -65,11 +60,8 @@ public class ClusterWaitTests {
     timeout_if_the_cluster_is_not_healthy() throws InterruptedException {
         when(clusterHealthCheck.isClusterHealthy(cluster)).thenReturn(failure("failure!"));
 
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("failure!");
-
         ClusterWait wait = new ClusterWait(clusterHealthCheck, DURATION);
 
-        wait.waitUntilReady(cluster);
+		assertThatIllegalStateException().isThrownBy(() -> wait.waitUntilReady(cluster)).withMessageContaining("failure!");
     }
 }

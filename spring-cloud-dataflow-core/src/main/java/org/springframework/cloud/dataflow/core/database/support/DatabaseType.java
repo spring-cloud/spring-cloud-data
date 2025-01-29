@@ -69,11 +69,10 @@ public enum DatabaseType {
 	 * @throws MetaDataAccessException thrown if failure occurs on metadata lookup.
 	 */
 	public static DatabaseType fromMetaData(DataSource dataSource) throws MetaDataAccessException {
-		String databaseProductName = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName").toString();
+		String databaseProductName = JdbcUtils.extractDatabaseMetaData(dataSource, DatabaseMetaData::getDatabaseProductName);
 		if (StringUtils.hasText(databaseProductName) && !databaseProductName.equals("DB2/Linux")
 				&& databaseProductName.startsWith("DB2")) {
-			String databaseProductVersion = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductVersion")
-					.toString();
+			String databaseProductVersion = JdbcUtils.extractDatabaseMetaData(dataSource, DatabaseMetaData::getDatabaseProductVersion);
 			if (!databaseProductVersion.startsWith("SQL")) {
 				databaseProductName = "DB2ZOS";
 			} else {

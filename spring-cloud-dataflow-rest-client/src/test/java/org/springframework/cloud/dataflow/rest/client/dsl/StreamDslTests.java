@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.rest.client.dsl;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -75,11 +76,18 @@ class StreamDslTests {
 
 	private final StreamApplication logApplication = new StreamApplication("log");
 
+	private AutoCloseable autoCloseable;
+
 	@BeforeEach
 	void init() {
-		MockitoAnnotations.initMocks(this);
+		autoCloseable = MockitoAnnotations.openMocks(this);
 		when(client.streamOperations()).thenReturn(this.streamOperations);
 		when(client.runtimeOperations()).thenReturn(this.runtimeOperations);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		autoCloseable.close();
 	}
 
 	@Test
