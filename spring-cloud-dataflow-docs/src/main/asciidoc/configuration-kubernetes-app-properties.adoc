@@ -1144,6 +1144,72 @@ deployer.<application>.kubernetes.initContainers[1]={containerName:'test2', imag
 
 Replace `<application>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.
 
+You can configure the Init Container at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    initContainers:
+                      - containerName: test
+                        imageName: busybox:latest
+                        commands:
+                          - sh
+                          - -c
+                          - echo hello
+                      - containerName: test2
+                        imageName: busybox:latest
+                        commands:
+                          - sh
+                          - -c
+                          - echo world
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    initContainers:
+                      - containerName: test
+                        imageName: busybox:latest
+                        commands:
+                          - sh
+                          - -c
+                          - echo hello
+                      - containerName: test2
+                        imageName: busybox:latest
+                        commands:
+                          - sh
+                          - -c
+                          - echo world
+----
+====
+
+Replace the `initContainers` attribute with the appropriate value for your environment.
+
 ==== Lifecycle Support
 
 When you deploy applications, you may attach `postStart` and `preStop` https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/[Lifecycle handlers] to execute commands.
@@ -1158,6 +1224,60 @@ deployer.<application>.kubernetes.lifecycle.preStop.exec.command=/bin/sh,-c,'ngi
 ----
 ====
 
+You can configure the Lifecycle at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    lifecycle:
+                      postStart:
+                        exec:
+                          command:
+                          	- /bin/sh
+                          	- -c
+                          	- 'echo Hello from the postStart handler > /usr/share/message'
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    lifecycle:
+                      postStart:
+                        exec:
+                          command:
+                          	- /bin/sh
+                          	- -c
+                          	- 'echo Hello from the postStart handler > /usr/share/message'
+----
+====
+
+Replace the `lifecycle` attribute with the appropriate value for your environment.
+
 ==== Additional Containers
 
 When you deploy applications, you may need one or more containers to be deployed along with the main container.
@@ -1171,3 +1291,77 @@ The following example shows how you can configure additional containers for an a
 deployer.<application>.kubernetes.additionalContainers=[{name: 'c1', image: 'busybox:1', command: ['sh', '-c', 'echo hello1'], volumeMounts: [{name: 'test-volume', mountPath: '/tmp', readOnly: true}]},{name: 'c2', image: 'busybox:1.26.1', command: ['sh', '-c', 'echo hello2']}]
 ----
 ====
+
+You can configure the Additional Containers at the global server level as well.
+
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    additionalContainers:
+                      - name: 'c1'
+                        image: 'busybox:1'
+					    command:
+						  - sh
+						  - -c
+						  - 'echo hello1'
+					    volumeMounts:
+						  - name: 'test-volume'
+						    mountPath: '/tmp'
+						    readOnly: true
+				      - name: 'c2'
+					    image: 'busybox:1.26.1'
+					    command:
+						  - sh
+						  - -c
+						  - 'echo hello2'
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    additionalContainers:
+                      - name: 'c1'
+                        image: 'busybox:1'
+					    command:
+						  - sh
+						  - -c
+						  - 'echo hello1'
+					    volumeMounts:
+						  - name: 'test-volume'
+						    mountPath: '/tmp'
+						    readOnly: true
+				      - name: 'c2'
+					    image: 'busybox:1.26.1'
+					    command:
+						  - sh
+						  - -c
+						  - 'echo hello2'
+----
+====
+
+Replace the `additionalContainers` attribute with the appropriate value for your environment.
